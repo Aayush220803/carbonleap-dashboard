@@ -1,25 +1,28 @@
+# render.yaml
+# Corrected version with 'postgres' type
+
 services:
-  # Managed PostgreSQL Database
-  - type: psql
+  # PostgreSQL Database
+  - type: postgres # Changed from psql
     name: farm-database
     plan: free
     databaseName: farm_db
     user: carbonleap
 
-  # Managed Redis Instance for Celery
+  # Redis Instance
   - type: redis
     name: farm-redis
     plan: free
 
   # Backend API (FastAPI)
-  - type: psv # Private Service, not exposed to the public internet
+  - type: psv
     name: backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: SQLALCHEMY_DATABASE_URL
         fromService:
-          type: psql
+          type: postgres # Changed from psql
           name: farm-database
           property: connectionString
       - key: CELERY_BROKER_URL
@@ -42,7 +45,7 @@ services:
     envVars:
       - key: SQLALCHEMY_DATABASE_URL
         fromService:
-          type: psql
+          type: postgres # Changed from psql
           name: farm-database
           property: connectionString
       - key: CELERY_BROKER_URL
@@ -57,10 +60,9 @@ services:
           property: connectionString
 
   # Frontend (React)
-  - type: web # Web Service, gets a public URL
+  - type: web
     name: frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
-    # Render automatically forwards public traffic to the container's exposed port (80 for Nginx)
     healthCheck:
       path: /
