@@ -1,5 +1,5 @@
 # render.yaml
-# Corrected version with top-level 'databases' block
+# Corrected version with 'private' service type
 
 databases:
   # Managed PostgreSQL Database
@@ -15,13 +15,13 @@ services:
     plan: free
 
   # Backend API (FastAPI)
-  - type: psv # Private Service
+  - type: private # Changed from psv
     name: backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: SQLALCHEMY_DATABASE_URL
-        fromDatabase: # Corrected directive for databases
+        fromDatabase:
           name: farm-database
           property: connectionString
       - key: CELERY_BROKER_URL
@@ -43,7 +43,7 @@ services:
     startCommand: celery -A app.tasks.main.celery_app worker --loglevel=info
     envVars:
       - key: SQLALCHEMY_DATABASE_URL
-        fromDatabase: # Corrected directive for databases
+        fromDatabase:
           name: farm-database
           property: connectionString
       - key: CELERY_BROKER_URL
@@ -58,7 +58,7 @@ services:
           property: connectionString
 
   # Frontend (React)
-  - type: web # Web Service
+  - type: web
     name: frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
