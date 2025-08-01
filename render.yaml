@@ -1,28 +1,27 @@
 # render.yaml
-# Corrected version with 'postgres' type
+# Corrected version with top-level 'databases' block
 
-services:
-  # PostgreSQL Database
-  - type: postgres # Changed from psql
-    name: farm-database
+databases:
+  # Managed PostgreSQL Database
+  - name: farm-database
     plan: free
     databaseName: farm_db
     user: carbonleap
 
-  # Redis Instance
+services:
+  # Managed Redis Instance for Celery
   - type: redis
     name: farm-redis
     plan: free
 
   # Backend API (FastAPI)
-  - type: psv
+  - type: psv # Private Service
     name: backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: SQLALCHEMY_DATABASE_URL
-        fromService:
-          type: postgres # Changed from psql
+        fromDatabase: # Corrected directive for databases
           name: farm-database
           property: connectionString
       - key: CELERY_BROKER_URL
@@ -44,8 +43,7 @@ services:
     startCommand: celery -A app.tasks.main.celery_app worker --loglevel=info
     envVars:
       - key: SQLALCHEMY_DATABASE_URL
-        fromService:
-          type: postgres # Changed from psql
+        fromDatabase: # Corrected directive for databases
           name: farm-database
           property: connectionString
       - key: CELERY_BROKER_URL
@@ -60,7 +58,7 @@ services:
           property: connectionString
 
   # Frontend (React)
-  - type: web
+  - type: web # Web Service
     name: frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
