@@ -1,5 +1,5 @@
 # render.yaml
-# Corrected version with 'private' service type
+# Final corrected version with 'pserv' for the private service type
 
 databases:
   # Managed PostgreSQL Database
@@ -14,8 +14,8 @@ services:
     name: farm-redis
     plan: free
 
-  # Backend API (FastAPI)
-  - type: private # Changed from psv
+  # Backend API (FastAPI) - as a Private Service
+  - type: pserv # Corrected from 'private' to 'pserv'
     name: backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
