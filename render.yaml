@@ -1,8 +1,7 @@
 # render.yaml
-# Final version, removing the invalid healthCheck key.
+# Final version with ipAllowList and removing the worker definition
 
 databases:
-  # Managed PostgreSQL Database
   - name: farm-database
     plan: free
     databaseName: farm_db
@@ -13,6 +12,7 @@ services:
   - type: redis
     name: farm-redis
     plan: free
+    ipAllowList: [] # Allows access from other services on your Render account
 
   # Backend API (FastAPI)
   - type: pserv
@@ -35,31 +35,11 @@ services:
           name: farm-redis
           property: connectionString
 
-  # Celery Background Worker
-  - type: worker
-    name: celery-worker
-    env: docker
-    dockerfilePath: ./backend/Dockerfile
-    startCommand: celery -A app.tasks.main.celery_app worker --loglevel=info
-    envVars:
-      - key: SQLALCHEMY_DATABASE_URL
-        fromDatabase:
-          name: farm-database
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: farm-redis
-          property: connectionString
-      - key: CELERY_RESULT_BACKEND
-        fromService:
-          type: redis
-          name: farm-redis
-          property: connectionString
-
   # Frontend (React)
   - type: web
     name: frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
-    # The healthCheck key has been removed as it's not valid for Docker services here.
+
+  # NOTE: The celery_worker is now defined in docker-compose.yml
+  # and will be picked up by the Blueprint.
