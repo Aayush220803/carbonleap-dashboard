@@ -4,7 +4,11 @@ An interactive web application designed to simulate, ingest, and analyze farm se
 This project was built as a full-stack take-home assignment for Carbonleap.
 
 🚀 Live Demo
-Live Demo URL: https://your-live-demo-url.com
+Live Demo Video: 
+
+https://github.com/user-attachments/assets/35591aa5-0f56-49cd-bcff-90347ce1ab0e
+
+Live URL is don't been provided because of paid plans of deployment hope you guys will understand.
 
 ✨ Key Features
 RESTful API: A robust backend API built with FastAPI for ingesting sensor data and retrieving analytics.
