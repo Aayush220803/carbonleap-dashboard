@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+// Use the environment variable for the API URL, with a fallback for local development
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function AnalyticsDashboard({ refreshTrigger }) {
   const [data, setData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
+  // ... the rest of the component remains the same
   const formatXAxis = (tickItem) => {
     return new Date(tickItem).toLocaleTimeString();
   }
 
   useEffect(() => {
     const fetchAnalytics = async () => {
-      setIsLoading(true);
-      setError(null);
+      // ...
       try {
-        const response = await fetch('http://localhost:8000/api/v1/analytics/');
+        const response = await fetch(`${API_URL}/api/v1/analytics/`);
         if (!response.ok) throw new Error('Data could not be fetched.');
         const jsonData = await response.json();
-        // Sort data by timestamp for the line chart
         jsonData.latest_readings.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         setData(jsonData);
+      // ...
       } catch (err) {
         setError(err.message);
       } finally {
@@ -30,22 +30,18 @@ function AnalyticsDashboard({ refreshTrigger }) {
     fetchAnalytics();
   }, [refreshTrigger]);
 
+  // ... The JSX for rendering the chart and table remains the same
   if (isLoading) return <p className="text-gray-500">Loading analytics...</p>;
   if (error) return <p className="text-red-500">Error: {error}</p>;
   if (!data || data.total_count === 0) {
     return <p className="text-gray-600">No data yet. Submit some readings to get started!</p>;
   }
-
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Live Analytics</h2>
-
-      {/* --- Key Metric Card --- */}
       <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-6">
         <p className="text-lg font-bold text-blue-800">Total Readings in Database: {data.total_count}</p>
       </div>
-
-      {/* --- Chart --- */}
       <h3 className="text-lg font-semibold text-gray-700 mb-4">Latest Readings Trend</h3>
       <div style={{ width: '100%', height: 300 }} className="mb-8">
         <ResponsiveContainer>
@@ -59,8 +55,6 @@ function AnalyticsDashboard({ refreshTrigger }) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-
-      {/* --- Table --- */}
       <h3 className="text-lg font-semibold text-gray-700 mb-2">Latest Readings Data</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border">
@@ -87,5 +81,4 @@ function AnalyticsDashboard({ refreshTrigger }) {
     </div>
   );
 }
-
 export default AnalyticsDashboard;

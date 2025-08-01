@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
+// Use the environment variable for the API URL, with a fallback for local development
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function DataUploadForm({ onJobSubmitted }) {
   const [jsonData, setJsonData] = useState('');
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const promise = new Promise(async (resolve, reject) => {
       try {
         const readings = JSON.parse(jsonData);
-        const response = await fetch('http://localhost:8000/api/v1/readings/', {
+        const response = await fetch(`${API_URL}/api/v1/readings/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(Array.isArray(readings) ? readings : [readings]),
@@ -19,14 +22,14 @@ function DataUploadForm({ onJobSubmitted }) {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const result = await response.json();
         onJobSubmitted(result.task_id);
         setJsonData('');
-        resolve(result); // Resolve the promise on success
+        resolve(result);
       } catch (err) {
         console.error("Upload failed:", err);
-        reject(err); // Reject the promise on error
+        reject(err);
       }
     });
 
@@ -38,6 +41,7 @@ function DataUploadForm({ onJobSubmitted }) {
   };
 
   return (
+    // ... JSX for the form remains the same
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg">
       <h3 className="text-xl font-semibold mb-4 text-gray-800">Submit Sensor Data</h3>
       <textarea
