@@ -1,0 +1,69 @@
+# render.yaml
+# Infrastructure as Code for the Field Insights Dashboard on Render.
+
+services:
+  # Managed PostgreSQL Database
+  - type: psql
+    name: farm-database
+    plan: free
+    databaseName: farm_db
+    user: carbonleap
+
+  # Managed Redis Instance for Celery
+  - type: redis
+    name: farm-redis
+    plan: free
+
+  # Backend API (FastAPI)
+  - type: psv # Private Service, not exposed to the public internet
+    name: backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: SQLALCHEMY_DATABASE_URL
+        fromService:
+          type: psql
+          name: farm-database
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: farm-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: farm-redis
+          property: connectionString
+
+  # Celery Background Worker
+  - type: worker
+    name: celery-worker
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    startCommand: celery -A app.tasks.main.celery_app worker --loglevel=info
+    envVars:
+      - key: SQLALCHEMY_DATABASE_URL
+        fromService:
+          type: psql
+          name: farm-database
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: farm-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: farm-redis
+          property: connectionString
+
+  # Frontend (React)
+  - type: web # Web Service, gets a public URL
+    name: frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    # Render automatically forwards public traffic to the container's exposed port (80 for Nginx)
+    healthCheck:
+      path: /
