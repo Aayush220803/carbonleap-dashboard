@@ -1,5 +1,5 @@
 # render.yaml
-# Final corrected version with 'pserv' for the private service type
+# Final version, removing the invalid healthCheck key.
 
 databases:
   # Managed PostgreSQL Database
@@ -14,8 +14,8 @@ services:
     name: farm-redis
     plan: free
 
-  # Backend API (FastAPI) - as a Private Service
-  - type: pserv # Corrected from 'private' to 'pserv'
+  # Backend API (FastAPI)
+  - type: pserv
     name: backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
@@ -62,5 +62,4 @@ services:
     name: frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
-    healthCheck:
-      path: /
+    # The healthCheck key has been removed as it's not valid for Docker services here.
